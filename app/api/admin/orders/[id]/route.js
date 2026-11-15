@@ -1,6 +1,7 @@
 import { requireAdmin, json, isJson } from "../../../../../lib/auth";
 import { getOrder, saveOrder, deleteOrder } from "../../../../../lib/store";
 import { STATUSES } from "../../../../../lib/config";
+import { cleanText } from "../../../../../lib/orders";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,7 +19,20 @@ export async function PATCH(req, ctx) {
 
   if (b.status !== undefined) {
     if (!STATUSES.some((s) => s.id === b.status)) return json({ error: "Invalid status." }, 400);
+    if (order.status !== b.status) {
+      order.history = [...(order.history || [{ status: order.status, at: order.createdAt }]), { status: b.status, at: new Date().toISOString() }];
+    }
     order.status = b.status;
+  }
+  // courier + tracking (shown to the customer on /track)
+  if (b.courier !== undefined) {
+    const c = cleanText(b.courier, 40);
+    order.courier = c;
+  }
+  if (b.trackingId !== undefined) order.trackingId = cleanText(b.trackingId, 60);
+  if (b.trackingUrl !== undefined) {
+    const u = cleanText(b.trackingUrl, 300);
+    order.trackingUrl = /^https?:\/\//i.test(u) ? u : "";
   }
   if (b.note !== undefined) order.note = String(b.note).replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 500);
   order.updatedAt = new Date().toISOString();

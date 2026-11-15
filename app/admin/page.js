@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Logo from "../../components/Logo";
-import { STATUSES } from "../../lib/config";
+import { STATUSES, COURIERS } from "../../lib/config";
 
 const money = (n) => "Rs. " + String(n ?? 0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const statusLabel = (id) => (STATUSES.find((s) => s.id === id) || { label: id }).label;
@@ -70,8 +70,28 @@ function Login({ onDone }) {
 }
 
 /* ---------------- one order ---------------- */
-function OrderCard({ o, onStatus, onDelete, onNote }) {
+function OrderCard({ o, onStatus, onDelete, onNote, onTrack }) {
   const [note, setNote] = useState(o.note || "");
+  const known = COURIERS.includes(o.courier);
+  const [courier, setCourier] = useState(o.courier ? (known ? o.courier : "Other") : "");
+  const [custom, setCustom] = useState(o.courier && !known ? o.courier : "");
+  const [tid, setTid] = useState(o.trackingId || "");
+  const [turl, setTurl] = useState(o.trackingUrl || "");
+  const [saved, setSaved] = useState(false);
+  const courierName = courier === "Other" ? custom.trim() : courier;
+  const needsTracking = o.status === "dispatched" && !o.trackingId;
+  const saveTrack = async () => {
+    await onTrack(o.id, { courier: courierName, trackingId: tid.trim(), trackingUrl: turl.trim() });
+    setSaved(true); setTimeout(() => setSaved(false), 2000);
+  };
+  const trackLink = typeof window !== "undefined" ? `${window.location.origin}/track?id=${o.id}` : "";
+  const tellCustomer = waLink(o.phone, [
+    `Assalam o Alaikum ${o.name}! Your SWAN order ${o.id} has been dispatched.`,
+    courierName ? `Courier: ${courierName}` : null,
+    tid.trim() ? `Tracking ID: ${tid.trim()}` : null,
+    turl.trim() ? `Track here: ${turl.trim()}` : null,
+    `You can also check your order status any time: ${trackLink}`,
+  ].filter(Boolean).join("\n"));
   const isNew = o.status === "new" || o.status === "awaiting_payment";
   const adv = o.payment === "advance";
   return (
@@ -100,7 +120,7 @@ function OrderCard({ o, onStatus, onDelete, onNote }) {
         <section>
           <h4>Deliver to</h4>
           <p>{o.address}</p>
-          <p>{o.city}, {o.country}</p>
+          <p>{[o.city, o.province, o.country].filter(Boolean).join(", ")}</p>
           {(o.meta?.ipCity || o.meta?.device) && (
             <p className="ad-dim">Ordered from {[o.meta?.device, o.meta?.ipCity && `near ${o.meta.ipCity}`].filter(Boolean).join(" · ")}{o.meta?.ip ? ` · IP ${o.meta.ip}` : ""}</p>
           )}
@@ -113,6 +133,25 @@ function OrderCard({ o, onStatus, onDelete, onNote }) {
           <p className="ad-total">{money(o.total)}</p>
         </section>
       </div>
+
+      <section className={`ad-ship ${needsTracking ? "need" : ""}`}>
+        <h4>Courier &amp; tracking <small>(the customer sees this on the tracking page)</small></h4>
+        {needsTracking && <p className="ad-nudge">Parcel is dispatched. Add the courier and tracking ID so the customer can follow it.</p>}
+        <div className="ad-ship-grid">
+          <select value={courier} onChange={(e) => setCourier(e.target.value)} aria-label="Courier">
+            <option value="">Select courier…</option>
+            {COURIERS.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+          {courier === "Other" && <input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="Courier name" maxLength={40} />}
+          <input value={tid} onChange={(e) => setTid(e.target.value)} placeholder="Tracking ID / CN number" maxLength={60} />
+          <input value={turl} onChange={(e) => setTurl(e.target.value)} placeholder="Courier tracking link (optional)" maxLength={300} />
+        </div>
+        <div className="ad-actions">
+          <button className="ad-btn sm" onClick={saveTrack}>{saved ? "Saved ✓" : "Save tracking"}</button>
+          {o.status !== "dispatched" && o.status !== "delivered" && <button className="ad-chip" onClick={() => onStatus(o.id, "dispatched")}>Mark as dispatched</button>}
+          <a className="ad-chip wapp" target="_blank" rel="noopener noreferrer" href={tellCustomer}>Send tracking on WhatsApp</a>
+        </div>
+      </section>
 
       <footer>
         <input value={note} onChange={(e) => setNote(e.target.value)} onBlur={() => note !== (o.note || "") && onNote(o.id, note)} placeholder="Add a note (e.g. called, payment received, tracking no.)" maxLength={500} aria-label="Note" />
@@ -183,7 +222,7 @@ function Dashboard({ onLoggedOut }) {
 
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase();
-    return (orders || []).filter((o) => (filter === "all" || o.status === filter) && (!s || [o.id, o.name, o.phone, o.city, o.address, o.email].join(" ").toLowerCase().includes(s)));
+    return (orders || []).filter((o) => (filter === "all" || o.status === filter) && (!s || [o.id, o.name, o.phone, o.city, o.province, o.address, o.email, o.trackingId, o.courier].join(" ").toLowerCase().includes(s)));
   }, [orders, filter, q]);
 
   const count = (id) => (orders || []).filter((o) => o.status === id).length;
@@ -229,7 +268,7 @@ function Dashboard({ onLoggedOut }) {
       ) : (
         <div className="ad-list">
           {shown.map((o) => (
-            <OrderCard key={o.id} o={o} onStatus={(id, status) => patch(id, { status })} onNote={(id, note) => patch(id, { note })} onDelete={remove} />
+            <OrderCard key={o.id} o={o} onStatus={(id, status) => patch(id, { status })} onNote={(id, note) => patch(id, { note })} onTrack={(id, t) => patch(id, t)} onDelete={remove} />
           ))}
         </div>
       )}

@@ -3,14 +3,16 @@ import "./globals.css";
 
 const serif = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
   style: ["normal", "italic"],
   variable: "--font-serif",
+  display: "swap",
 });
 const sans = Jost({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400", "500"],
   variable: "--font-sans",
+  display: "swap",
 });
 
 export const metadata = {

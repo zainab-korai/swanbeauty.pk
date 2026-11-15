@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { SwanMark } from "../components/Bottle";
 import Bottle3D from "../components/Bottle3D";
 import Logo from "../components/Logo";
+import Select from "../components/Select";
 import { startFlight } from "../lib/flyingBottle";
-import { SITE } from "../lib/config";
+import { SITE, PROVINCES } from "../lib/config";
 
 const money = (n) => "Rs. " + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const clamp = (n, a = 0, b = 1) => Math.min(b, Math.max(a, n));
@@ -30,6 +31,21 @@ function Picture({ name, alt, className = "" }) {
   );
 }
 
+/* video that only loads and plays while it is on screen (saves CPU, battery and data) */
+function LazyVideo({ src, poster }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { if (!v.src) v.src = src; v.play().catch(() => {}); } else v.pause();
+    }, { threshold: 0.15 });
+    io.observe(v);
+    return () => io.disconnect();
+  }, [src]);
+  return <video ref={ref} muted loop playsInline preload="none" poster={poster} />;
+}
+
 /* public/videos/ritual.mp4 ho to video chalegi, warna image */
 function RitualMedia() {
   const [hasVideo, setHasVideo] = useState(false);
@@ -41,7 +57,7 @@ function RitualMedia() {
   if (hasVideo) {
     return (
       <div className="media wide">
-        <video src="/videos/ritual.mp4" autoPlay muted loop playsInline />
+        <LazyVideo src="/videos/ritual.mp4" />
       </div>
     );
   }
@@ -105,16 +121,23 @@ function useSectionProgress() {
   const ref = useRef(null);
   const [p, setP] = useState(0);
   useEffect(() => {
-    const on = () => {
+    let raf = 0;
+    const run = () => {
+      raf = 0;
       if (!ref.current) return;
       const r = ref.current.getBoundingClientRect();
-      const span = r.height - window.innerHeight;
-      setP(span > 0 ? clamp(-r.top / span) : 0);
+      const vh = window.innerHeight;
+      if (r.bottom < -vh * 0.5 || r.top > vh * 1.5) return; // far away: nothing to animate
+      const span = r.height - vh;
+      const v = span > 0 ? clamp(-r.top / span) : 0;
+      setP((old) => (Math.abs(old - v) < 0.004 && v !== 0 && v !== 1 ? old : Math.round(v * 1000) / 1000));
     };
-    on();
+    const on = () => { if (!raf) raf = requestAnimationFrame(run); };
+    run();
     window.addEventListener("scroll", on, { passive: true });
     window.addEventListener("resize", on);
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener("scroll", on);
       window.removeEventListener("resize", on);
     };
@@ -193,7 +216,7 @@ function Story() {
 const waUrl = (text) => `https://wa.me/${SITE.phoneIntl}?text=${encodeURIComponent(text)}`;
 
 function OrderForm() {
-  const empty = { name: "", phone: "", email: "", country: "Pakistan", city: "", address: "", website: "" };
+  const empty = { name: "", phone: "", email: "", country: "Pakistan", province: "", city: "", address: "", website: "" };
   const [qty, setQty] = useState(1);
   const [pay, setPay] = useState("cod");
   const [f, setF] = useState(empty);
@@ -211,6 +234,7 @@ function OrderForm() {
   const submit = async (e) => {
     e.preventDefault();
     if (abroad || busy) return;
+    if (!f.province) { setErr("Please select your province."); return; }
     setErr("");
     setBusy(true);
 
@@ -230,6 +254,7 @@ function OrderForm() {
         `Product: ${SITE.product} x ${qty}`,
         `Name: ${f.name}`,
         `Phone: ${f.phone}`,
+        `Province: ${f.province}`,
         `City: ${f.city}`,
         `Address: ${f.address}`,
         `Total: ${money(total)} (products ${money(sub)} + delivery ${money(delivery)})`,
@@ -265,6 +290,8 @@ function OrderForm() {
             : `Thank you, ${done.name}. We will contact you shortly to confirm your order. You pay ${money(done.total)} in cash when it arrives.`}
         </p>
         {done.id && <p className="oid">Order ID <b>{done.id}</b></p>}
+        {done.id && <p className="oid-hint">Save this ID. You can follow your order any time with your ID and phone number.</p>}
+        {done.id && <a className="btn btn-sm" href={`/track?id=${encodeURIComponent(done.id)}`}>Track my order</a>}
         <button type="button" className="btn btn-ghost" onClick={() => { setDone(null); setF(empty); setQty(1); setPay("cod"); }}>Place another order</button>
       </div>
     );
@@ -277,13 +304,13 @@ function OrderForm() {
         <label>Full name<input required value={f.name} onChange={set("name")} autoComplete="name" placeholder="Your name" /></label>
         <label>Phone / WhatsApp<input required inputMode="tel" value={f.phone} onChange={set("phone")} autoComplete="tel" placeholder="03XX XXXXXXX" /></label>
         <label>Email <small>(optional)</small><input type="email" value={f.email} onChange={set("email")} autoComplete="email" placeholder="you@example.com" /></label>
-        <label>Country
-          <select value={f.country} onChange={set("country")}>
-            <option value="Pakistan">Pakistan</option>
-            <option value="Other">Other country</option>
-          </select>
-        </label>
-        {abroad && <div className="notice wide" role="alert">Sorry, we currently deliver within Pakistan only. We don't ship internationally yet. Please select Pakistan to continue.</div>}
+        <div className="fld">Country
+          <Select label="Country" value={f.country} onChange={(v) => setF({ ...f, country: v })} options={[{ value: "Pakistan", label: "Pakistan" }, { value: "Other", label: "Outside Pakistan" }]} />
+        </div>
+        <div className="fld">Province
+          <Select label="Province" value={f.province} onChange={(v) => setF({ ...f, province: v })} options={PROVINCES} placeholder="Select your province" invalid={!f.province && !!err} />
+        </div>
+        {abroad && <div className="notice wide" role="alert">We're not delivering to other countries just yet. For now, SWAN is available only within Pakistan. Choose Pakistan to continue.</div>}
         <label>City<input required value={f.city} onChange={set("city")} autoComplete="address-level2" placeholder="Karachi, Lahore, Islamabad..." /></label>
         <label className="qty">Quantity
           <span className="stepper">
@@ -333,19 +360,24 @@ export default function Home() {
   /* parallax + progress bar + nav state */
   useEffect(() => {
     let raf = 0;
+    let wasScrolled = false;
+    const bar = document.querySelector(".progress");
     const els = Array.from(document.querySelectorAll("[data-speed]"));
     const update = () => {
+      raf = 0;
       const vh = window.innerHeight;
       const y = window.scrollY;
-      setScrolled(y > 40);
+      if (y > 40 !== wasScrolled) { wasScrolled = y > 40; setScrolled(wasScrolled); }
       const max = document.documentElement.scrollHeight - vh;
-      document.documentElement.style.setProperty("--progress", String(max > 0 ? y / max : 0));
+      if (bar) bar.style.transform = `scaleX(${max > 0 ? (y / max).toFixed(4) : 0})`;
+      const phone = window.innerWidth < 800; // parallax is skipped on phones: smoother scrolling
       els.forEach((el) => {
+        if (phone) { if (el.style.transform) el.style.transform = ""; return; }
         const r = el.parentElement.getBoundingClientRect();
+        if (r.bottom < -300 || r.top > vh + 300) return; // off screen
         const center = r.top + r.height / 2 - vh / 2;
         el.style.transform = `translate3d(0, ${(-center * parseFloat(el.dataset.speed)).toFixed(1)}px, 0)`;
       });
-      raf = 0;
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -396,6 +428,7 @@ export default function Home() {
             <a href="#product">Formula</a>
             <a href="#ingredients">Ingredients</a>
             <a href="#order">Order</a>
+            <a href="/track">Track order</a>
           </nav>
           <a href="#order" className="btn btn-sm">Order Now</a>
         </div>
@@ -512,7 +545,7 @@ export default function Home() {
         </div>
         <div className="real-media">
           <div className="phone reveal" data-speed="-0.05">
-            <video src="/videos/product.mp4" autoPlay muted loop playsInline poster="/images/product-real-1.jpg" />
+            <LazyVideo src="/videos/product.mp4" poster="/images/product-real-1.jpg" />
           </div>
           <div className="photo p1" data-speed="0.08"><Picture name="product-real-2" alt="SWAN Cleanser + Facewash in hand" /></div>
           <div className="photo p2" data-speed="-0.08"><Picture name="product-detail" alt="Close-up of the gel, beads and label" /></div>

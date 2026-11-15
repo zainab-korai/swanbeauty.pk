@@ -66,3 +66,18 @@ scripts/        set-password.js, make_images.py
 
 ## Images
 `public/images/` me same naam se file rakhein (jpg, png, webp ya svg): `about-woman`, `ritual`, `model-1`, `model-2`, `model-3`.
+
+
+## Order tracking (v8)
+- Customer page: `/track`. Customer enters Order ID + phone number (phone stops people guessing IDs).
+  After ordering, the thank-you box also has a "Track my order" button.
+- Customer sees: status steps (Order received, Confirmed, On its way, Delivered), courier name, tracking ID (with Copy button) and an optional courier link.
+- Admin (`/admin`): every order has a "Courier & tracking" box. Choose courier (TCS, Leopards, M&P, PostEx, Trax, BlueEX, Call Courier, Pakistan Post, Other), type the tracking ID, optional courier link, press "Save tracking".
+  Use "Send tracking on WhatsApp" to message the customer the courier + tracking ID + `/track` link.
+- Status flow: New / Awaiting payment -> Confirmed -> Dispatched -> Delivered (or Cancelled). Every change is time-stamped and shown to the customer.
+- Order form: Country (Pakistan / Outside Pakistan), Province list (7), themed dropdowns. Orders now store the province and show it in admin + CSV.
+
+## Speed (v8)
+- Removed the full-screen blend overlay, blur filters and backdrop-filter blurs, the main causes of lag.
+- 3D bottle starts after the page has loaded, draws a smaller canvas, caps frame rate (50 fps laptop, 30 fps phone) and uses a lighter mode on phones / low-power laptops.
+- Images shrunk (labels are now `.webp`), video plays only while visible, parallax is off on phones.

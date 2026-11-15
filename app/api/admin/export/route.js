@@ -15,13 +15,13 @@ export async function GET(req) {
   const denied = requireAdmin(req);
   if (denied) return denied;
   const orders = await listOrders();
-  const head = ["Order ID", "Time (Pakistan)", "Status", "Name", "Phone", "Email", "Country", "City", "Address", "Qty", "Payment", "Products", "Delivery", "Total", "Device", "IP", "IP city", "Note"];
+  const head = ["Order ID", "Time (Pakistan)", "Status", "Name", "Phone", "Email", "Country", "Province", "City", "Address", "Qty", "Payment", "Products", "Delivery", "Total", "Device", "IP", "IP city", "Courier", "Tracking ID", "Note"];
   const rows = orders.map((o) => [
     o.id,
     new Date(o.createdAt).toLocaleString("en-GB", { timeZone: "Asia/Karachi" }),
-    o.status, o.name, o.phone, o.email, o.country, o.city, o.address, o.qty,
+    o.status, o.name, o.phone, o.email, o.country, o.province, o.city, o.address, o.qty,
     o.payment === "advance" ? "Advance" : "Cash on Delivery",
-    o.subtotal, o.delivery, o.total, o.meta?.device, o.meta?.ip, o.meta?.ipCity, o.note,
+    o.subtotal, o.delivery, o.total, o.meta?.device, o.meta?.ip, o.meta?.ipCity, o.courier, o.trackingId, o.note,
   ]);
   const csv = "﻿" + [head, ...rows].map((r) => r.map(cell).join(",")).join("\r\n");
   return new Response(csv, {
