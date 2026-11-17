@@ -91,7 +91,7 @@ scripts/        set-password.js, make_images.py
 
 
 ## v10
-- 3D bottle removed (and the `three` package). The hero now shows your real product photo (`public/images/product-real-2.jpg`).
+- 3D bottle removed (and the `three` package). The hero now shows your real product photo (`public/images/product-real-2.png`).
 - Colours follow the logo: cream `#FDF8EE`, brown `#825830`, gold `#C9A26A`, dark brown `#4A2E14`, with a small touch of gel green on the "beads".
 - New sections: Made for, Cleanse/Exfoliate/Nourish, stats strip, Good habits, On the label (front + back), How ordering works, bigger FAQ, full footer, mobile "Order now" bar.
 - `public/images/label-front.webp` and `label-back.webp` come from your label artwork.

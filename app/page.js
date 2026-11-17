@@ -323,7 +323,7 @@ export default function Home() {
           <i className="bead b1" aria-hidden="true" /><i className="bead b2" aria-hidden="true" /><i className="bead b3" aria-hidden="true" />
           <div className="hero-photo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/product-real-2.jpg" alt="SWAN Cleanser + Facewash bottle with green gel and Anti-Acne Beads" width="900" height="1896" fetchPriority="high" decoding="async" />
+            <img src="/images/product-real-2.png" alt="SWAN Cleanser + Facewash bottle with green gel and Anti-Acne Beads" width="900" height="1896" fetchPriority="high" decoding="async" />
           </div>
           <span className="stag s1">Vitamin D</span>
           <span className="stag s2">Salicylic Acid</span>
@@ -464,7 +464,7 @@ export default function Home() {
         <div className="how-art reveal">
           <div className="photo-arch">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/product-real-3.jpg" alt="Holding the SWAN Cleanser + Facewash bottle" width="900" height="1896" loading="lazy" decoding="async" />
+            <img src="/images/product-real-33.png" alt="Holding the SWAN Cleanser + Facewash bottle" width="900" height="1896" loading="lazy" decoding="async" />
           </div>
         </div>
         <div className="how-copy">
