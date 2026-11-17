@@ -1,5 +1,5 @@
 "use client";
-// Customer order tracking: Order ID + phone number -> status, timeline, courier and tracking ID.
+// Customer order tracking: Order ID OR phone number (either one is enough) -> status, timeline, courier and tracking ID.
 import { useCallback, useEffect, useRef, useState } from "react";
 import Logo from "./Logo";
 import { SITE, CUSTOMER_STATUS } from "../lib/config";
@@ -19,7 +19,8 @@ export default function Track() {
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const [o, setO] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [selId, setSelId] = useState("");
   const [copied, setCopied] = useState(false);
   const last = useRef(null);
 
@@ -28,20 +29,31 @@ export default function Track() {
     try {
       const r = await fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: i, phone: p }) });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok) { if (!quiet) { setO(null); setErr(d.error || "Something went wrong. Please try again."); } }
-      else { setO(d.order); last.current = [i, p]; }
+      if (!r.ok) {
+        if (!quiet) { setOrders([]); setSelId(""); setErr(d.error || "Something went wrong. Please try again."); }
+      } else {
+        const list = d.orders && d.orders.length ? d.orders : d.order ? [d.order] : [];
+        setOrders(list);
+        if (!quiet) setSelId(list[0] ? list[0].id : "");
+        last.current = [i, p];
+      }
     } catch {
       if (!quiet) setErr("Network problem. Please check your connection and try again.");
     }
     if (!quiet) setBusy(false);
   }, []);
 
+  // if the link has ?id=..., fill it in and look it up straight away
   useEffect(() => {
     try {
       const q = new URLSearchParams(window.location.search).get("id");
-      if (q) setId(q.toUpperCase());
+      if (q) {
+        const v = q.toUpperCase();
+        setId(v);
+        look(v, "");
+      }
     } catch {}
-  }, []);
+  }, [look]);
 
   // refresh quietly every minute while the page is open
   useEffect(() => {
@@ -49,7 +61,19 @@ export default function Track() {
     return () => clearInterval(t);
   }, [look]);
 
-  const submit = (e) => { e.preventDefault(); look(id, phone); };
+  const submit = (e) => {
+    e.preventDefault();
+    if (!id.trim() && !phone.trim()) {
+      setOrders([]);
+      setSelId("");
+      setErr("Please enter your Order ID or your phone number.");
+      return;
+    }
+    look(id, phone);
+  };
+
+  const o = orders.find((x) => x.id === selId) || orders[0] || null;
+
   const copy = async () => {
     try { await navigator.clipboard.writeText(o.trackingId); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch {}
   };
@@ -74,14 +98,38 @@ export default function Track() {
       <section className="trk-card">
         <p className="eyebrow">ORDER TRACKING</p>
         <h1>Where is my order?</h1>
-        <p className="trk-lead">Enter the Order ID you received and the phone number you ordered with.</p>
+        <p className="trk-lead">Enter your Order ID or the phone number you ordered with. One of the two is enough.</p>
         <form onSubmit={submit} className="trk-form">
-          <label>Order ID<input required value={id} onChange={(e) => setId(e.target.value.toUpperCase())} placeholder="SW-261113-ABCD" autoComplete="off" /></label>
-          <label>Phone number<input required inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="03XX XXXXXXX" autoComplete="tel" /></label>
+          <label>Order ID<input value={id} onChange={(e) => setId(e.target.value.toUpperCase())} placeholder="SW-261113-ABCD" autoComplete="off" /></label>
+          <label>Phone number<input inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="03XX XXXXXXX" autoComplete="tel" /></label>
           <button className="btn" disabled={busy}>{busy ? "Checking…" : "Track order"}</button>
         </form>
         {err && <div className="notice" role="alert">{err}</div>}
       </section>
+
+      {orders.length > 1 && (
+        <section className="trk-card" aria-label="Your orders">
+          <h3 style={{ marginTop: 0 }}>We found {orders.length} orders</h3>
+          <div style={{ display: "grid", gap: 8 }}>
+            {orders.map((x) => {
+              const s = CUSTOMER_STATUS[x.status] || { label: x.status };
+              const active = o && x.id === o.id;
+              return (
+                <button
+                  key={x.id}
+                  type="button"
+                  className={active ? "btn btn-sm" : "btn btn-sm btn-ghost"}
+                  onClick={() => setSelId(x.id)}
+                  style={{ display: "flex", justifyContent: "space-between", gap: 12, textAlign: "left" }}
+                >
+                  <span>{x.id}</span>
+                  <span>{s.label} · {fmt(x.createdAt)}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {o && (
         <section className="trk-card trk-result" aria-live="polite">

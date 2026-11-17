@@ -535,7 +535,7 @@ export default function Home() {
           <div className="phone reveal"><LazyVideo src="/videos/product.mp4" poster="/images/product-real-1.jpg" /></div>
           <div className="phone photo reveal">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero-bottle.jpg" alt="Close-up of the SWAN gel, beads and label" width="900" height="1536" loading="lazy" decoding="async" />
+            <img src="/images/hero-image.png" alt="Close-up of the SWAN gel, beads and label" width="900" height="1536" loading="lazy" decoding="async" />
           </div>
         </div>
       </section>

@@ -25,5 +25,38 @@
       "referrer": "http://localhost:3000/"
     },
     "updatedAt": "2026-11-13T10:28:26.871Z"
+  },
+  {
+    "id": "SW-261117-9579",
+    "createdAt": "2026-11-17T09:06:00.096Z",
+    "status": "new",
+    "history": [
+      {
+        "status": "new",
+        "at": "2026-11-17T09:06:00.096Z"
+      }
+    ],
+    "name": "zainab alii",
+    "phone": "03227650331",
+    "email": "",
+    "country": "Pakistan",
+    "province": "Sindh",
+    "city": "sukkurrr",
+    "address": "bvvbnbhhhhhh",
+    "qty": 1,
+    "payment": "cod",
+    "product": "Cleanser + Facewash (150 ml)",
+    "unitPrice": 999,
+    "subtotal": 999,
+    "delivery": 350,
+    "total": 1349,
+    "meta": {
+      "ip": "::1",
+      "device": "Desktop",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+      "ipCity": "",
+      "ipCountry": "",
+      "referrer": "http://localhost:3000/"
+    }
   }
 ]
