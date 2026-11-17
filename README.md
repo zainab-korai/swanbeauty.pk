@@ -48,7 +48,7 @@ Email badalni ho to `.env.local` me `ADMIN_EMAIL`.
 ## Price / delivery / WhatsApp number badalna
 `lib/config.js`:
 ```js
-price: 550, deliveryCOD: 350, deliveryAdvance: 99, phoneIntl: "923120089552"
+price: 999, deliveryCOD: 350, deliveryAdvance: 99, phoneIntl: "923120089552"
 ```
 Server khud price dobara calculate karta hai, isliye customer price badal nahi sakta. Website par number text me kahin nahi dikhta, sirf WhatsApp buttons me chhupa hai.
 
@@ -81,3 +81,24 @@ scripts/        set-password.js, make_images.py
 - Removed the full-screen blend overlay, blur filters and backdrop-filter blurs, the main causes of lag.
 - 3D bottle starts after the page has loaded, draws a smaller canvas, caps frame rate (50 fps laptop, 30 fps phone) and uses a lighter mode on phones / low-power laptops.
 - Images shrunk (labels are now `.webp`), video plays only while visible, parallax is off on phones.
+
+
+## New look (v9)
+- Clean ivory + emerald design. One 3D bottle in the first screen only (drag to turn, hover/tap the cap, it only draws while on screen). No flying bottle, no scroll tricks.
+- Illustrations (Pakistani women with dupatta, jhumke, maang tikka): `public/images/about-woman.svg`, `ritual.svg`, `model-1.svg`, `model-2.svg`, `model-3.svg`. They are original artwork, not photos.
+- To use real photos: put them in `public/images/` and change `.svg` to `.jpg` in the `<Art name=... />` lines in `app/page.js`.
+- Old product photos (`product-real-*.jpg`, `product-detail.jpg`) are still in `public/images/` but not used now.
+
+
+## v10
+- 3D bottle removed (and the `three` package). The hero now shows your real product photo (`public/images/product-real-2.jpg`).
+- Colours follow the logo: cream `#FDF8EE`, brown `#825830`, gold `#C9A26A`, dark brown `#4A2E14`, with a small touch of gel green on the "beads".
+- New sections: Made for, Cleanse/Exfoliate/Nourish, stats strip, Good habits, On the label (front + back), How ordering works, bigger FAQ, full footer, mobile "Order now" bar.
+- `public/images/label-front.webp` and `label-back.webp` come from your label artwork.
+- The "tree hydrated but some attributes didn't match" console warning comes from a browser extension (e.g. Grammarly) adding attributes to `<body>`. It is harmless; `layout.js` now silences it with `suppressHydrationWarning`.
+
+
+## v11
+- Price Rs. 999 (`lib/config.js`: price 999, deliveryCOD 350, deliveryAdvance 99). Change them there, the server recalculates every order itself.
+- Cartoon illustrations removed. The site now uses your real product photos.
+- Real model photos: put files like `model-1.jpg` in `public/images/` and list them in `MODEL_PHOTOS` in `lib/config.js`. A "For every skin" section appears automatically.
