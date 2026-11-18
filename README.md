@@ -69,7 +69,7 @@ scripts/        set-password.js, make_images.py
 
 
 ## Order tracking (v8)
-- Customer page: `/track`. Customer enters Order ID + phone number (phone stops people guessing IDs).
+- Customer page: `/track`. Customer enters only the Order ID (format `S` + 12 digits, e.g. S482915067341; long and random so it cannot be guessed).
   After ordering, the thank-you box also has a "Track my order" button.
 - Customer sees: status steps (Order received, Confirmed, On its way, Delivered), courier name, tracking ID (with Copy button) and an optional courier link.
 - Admin (`/admin`): every order has a "Courier & tracking" box. Choose courier (TCS, Leopards, M&P, PostEx, Trax, BlueEX, Call Courier, Pakistan Post, Other), type the tracking ID, optional courier link, press "Save tracking".
@@ -91,7 +91,7 @@ scripts/        set-password.js, make_images.py
 
 
 ## v10
-- 3D bottle removed (and the `three` package). The hero now shows your real product photo (`public/images/product-real-2.png`).
+- 3D bottle removed (and the `three` package). The hero now shows your real product photo (`public/images/product-real-2.jpg`).
 - Colours follow the logo: cream `#FDF8EE`, brown `#825830`, gold `#C9A26A`, dark brown `#4A2E14`, with a small touch of gel green on the "beads".
 - New sections: Made for, Cleanse/Exfoliate/Nourish, stats strip, Good habits, On the label (front + back), How ordering works, bigger FAQ, full footer, mobile "Order now" bar.
 - `public/images/label-front.webp` and `label-back.webp` come from your label artwork.
@@ -102,3 +102,8 @@ scripts/        set-password.js, make_images.py
 - Price Rs. 999 (`lib/config.js`: price 999, deliveryCOD 350, deliveryAdvance 99). Change them there, the server recalculates every order itself.
 - Cartoon illustrations removed. The site now uses your real product photos.
 - Real model photos: put files like `model-1.jpg` in `public/images/` and list them in `MODEL_PHOTOS` in `lib/config.js`. A "For every skin" section appears automatically.
+
+## v12 - Order ID aur tracking
+- Naya Order ID: `S` + 12 digits (e.g. `S482915067341`). Har order ka alag, random.
+- `/track` par ab sirf Order ID chahiye (phone number nahi). Purane `SW-...` IDs bhi chalte hain.
+- ID bhool jaye to Admin panel > search box mein customer ka naam / phone / city likhein, order card par uski ID likhi hoti hai.

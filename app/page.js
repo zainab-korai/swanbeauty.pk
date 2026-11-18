@@ -180,7 +180,7 @@ function OrderForm() {
             : `Thank you, ${done.name}. We will contact you shortly to confirm your order. You pay ${money(done.total)} in cash when it arrives.`}
         </p>
         {done.id && <p className="oid">Order ID <b>{done.id}</b></p>}
-        {done.id && <p className="oid-hint">Save this ID. You can follow your order any time with your ID and phone number.</p>}
+        {done.id && <p className="oid-hint">Save this ID. You can follow your order any time with just this Order ID.</p>}
         {done.id && <a className="btn btn-sm" href={`/track?id=${encodeURIComponent(done.id)}`}>Track my order</a>}
         <button type="button" className="btn btn-ghost" onClick={() => { setDone(null); setF(empty); setQty(1); setPay("cod"); }}>Place another order</button>
       </div>
@@ -323,7 +323,7 @@ export default function Home() {
           <i className="bead b1" aria-hidden="true" /><i className="bead b2" aria-hidden="true" /><i className="bead b3" aria-hidden="true" />
           <div className="hero-photo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/product-real-2.png" alt="SWAN Cleanser + Facewash bottle with green gel and Anti-Acne Beads" width="900" height="1896" fetchPriority="high" decoding="async" />
+            <img src="/images/product-real-2.jpg" alt="SWAN Cleanser + Facewash bottle with green gel and Anti-Acne Beads" width="900" height="1896" fetchPriority="high" decoding="async" />
           </div>
           <span className="stag s1">Vitamin D</span>
           <span className="stag s2">Salicylic Acid</span>
@@ -464,7 +464,7 @@ export default function Home() {
         <div className="how-art reveal">
           <div className="photo-arch">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/product-real-33.png" alt="Holding the SWAN Cleanser + Facewash bottle" width="900" height="1896" loading="lazy" decoding="async" />
+            <img src="/images/product-real-3.jpg" alt="Holding the SWAN Cleanser + Facewash bottle" width="900" height="1896" loading="lazy" decoding="async" />
           </div>
         </div>
         <div className="how-copy">
@@ -535,7 +535,7 @@ export default function Home() {
           <div className="phone reveal"><LazyVideo src="/videos/product.mp4" poster="/images/product-real-1.jpg" /></div>
           <div className="phone photo reveal">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero-image.png" alt="Close-up of the SWAN gel, beads and label" width="900" height="1536" loading="lazy" decoding="async" />
+            <img src="/images/hero-bottle.jpg" alt="Close-up of the SWAN gel, beads and label" width="900" height="1536" loading="lazy" decoding="async" />
           </div>
         </div>
       </section>
@@ -580,7 +580,7 @@ export default function Home() {
             ["What are the Anti-Acne Beads?", "Gentle exfoliating beads that burst with skin-loving vitamins as you massage, helping remove dirt, oil and dead skin cells."],
             ["What if my skin feels irritated?", "Stop using it and rinse well with water. Skin can be sensitive to acids, which is why we recommend a patch test first. If irritation continues, please see a doctor."],
             ["How do I order?", "Choose Cash on Delivery to place your order right here and pay when it arrives. Or choose Advance Payment: WhatsApp opens with your order ready to send, and we share the payment details."],
-            ["How can I track my order?", "After you order you get an Order ID. Open Track order, enter the ID and your phone number, and you will see the status and your courier tracking ID once it is dispatched."],
+            ["How can I track my order?", "After you order you get an Order ID. Open Track order, enter your Order ID, and you will see the status and your courier tracking ID once it is dispatched."],
             ["Do you deliver outside Pakistan?", "Not yet. We currently deliver within Pakistan only."],
           ].map(([q, a]) => (
             <details key={q}><summary>{q}</summary><p>{a}</p></details>
