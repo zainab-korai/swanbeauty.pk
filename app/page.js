@@ -18,19 +18,22 @@ function Photo({ file, alt, className = "" }) {
   );
 }
 
-/* video that only loads and plays while it is on screen (saves CPU, battery and data) */
-function LazyVideo({ src, poster }) {
+/* video: plays only while on screen (saves CPU, battery and data).
+   VIDEO_FOCUS = which part of the video stays visible in the tall frame.
+   0% = far left (the girl is on the left), 50% = centre, 100% = far right. */
+const VIDEO_FOCUS = "15% 50%";
+function LazyVideo({ src }) {
   const ref = useRef(null);
   useEffect(() => {
     const v = ref.current;
     if (!v || typeof IntersectionObserver === "undefined") return;
     const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { if (!v.src) v.src = src; v.play().catch(() => {}); } else v.pause();
+      if (e.isIntersecting) v.play().catch(() => {}); else v.pause();
     }, { threshold: 0.2 });
     io.observe(v);
     return () => io.disconnect();
-  }, [src]);
-  return <video ref={ref} muted loop playsInline preload="none" poster={poster} />;
+  }, []);
+  return <video ref={ref} src={src} muted loop playsInline preload="metadata" style={{ objectPosition: VIDEO_FOCUS }} />;
 }
 
 /* small line icons */
@@ -323,7 +326,7 @@ export default function Home() {
           <i className="bead b1" aria-hidden="true" /><i className="bead b2" aria-hidden="true" /><i className="bead b3" aria-hidden="true" />
           <div className="hero-photo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/product-real-2.jpg" alt="SWAN Cleanser + Facewash bottle with green gel and Anti-Acne Beads" width="900" height="1896" fetchPriority="high" decoding="async" />
+            <img src="/images/product-real-2.png" alt="SWAN Cleanser + Facewash bottle with green gel and Anti-Acne Beads" width="900" height="1896" fetchPriority="high" decoding="async" />
           </div>
           <span className="stag s1">Vitamin D</span>
           <span className="stag s2">Salicylic Acid</span>
@@ -464,7 +467,7 @@ export default function Home() {
         <div className="how-art reveal">
           <div className="photo-arch">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/product-real-3.jpg" alt="Holding the SWAN Cleanser + Facewash bottle" width="900" height="1896" loading="lazy" decoding="async" />
+            <img src="/images/product-real-33.png" alt="Holding the SWAN Cleanser + Facewash bottle" width="900" height="1896" loading="lazy" decoding="async" />
           </div>
         </div>
         <div className="how-copy">
@@ -532,10 +535,10 @@ export default function Home() {
           </ul>
         </div>
         <div className="real-media">
-          <div className="phone reveal"><LazyVideo src="/videos/product.mp4" poster="/images/product-real-1.jpg" /></div>
+          <div className="phone reveal"><LazyVideo src="/videos/ritual.mp4" /></div>
           <div className="phone photo reveal">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero-bottle.jpg" alt="Close-up of the SWAN gel, beads and label" width="900" height="1536" loading="lazy" decoding="async" />
+            <img src="/images/hero-image.png" alt="Close-up of the SWAN gel, beads and label" width="900" height="1536" loading="lazy" decoding="async" />
           </div>
         </div>
       </section>
