@@ -80,9 +80,13 @@ function OrderCard({ o, onStatus, onDelete, onNote, onTrack }) {
   const [saved, setSaved] = useState(false);
   const courierName = courier === "Other" ? custom.trim() : courier;
   const needsTracking = o.status === "dispatched" && !o.trackingId;
+  const [saving, setSaving] = useState(false);
   const saveTrack = async () => {
-    await onTrack(o.id, { courier: courierName, trackingId: tid.trim(), trackingUrl: turl.trim() });
-    setSaved(true); setTimeout(() => setSaved(false), 2000);
+    if (saving) return;
+    setSaving(true);
+    const ok = await onTrack(o.id, { courier: courierName, trackingId: tid.trim(), trackingUrl: turl.trim() });
+    setSaving(false);
+    if (ok) { setSaved(true); setTimeout(() => setSaved(false), 2500); }
   };
   const trackLink = typeof window !== "undefined" ? `${window.location.origin}/track?id=${o.id}` : "";
   const tellCustomer = waLink(o.phone, [
@@ -147,7 +151,7 @@ function OrderCard({ o, onStatus, onDelete, onNote, onTrack }) {
           <input value={turl} onChange={(e) => setTurl(e.target.value)} placeholder="Courier tracking link (optional)" maxLength={300} />
         </div>
         <div className="ad-actions">
-          <button className="ad-btn sm" onClick={saveTrack}>{saved ? "Saved ✓" : "Save tracking"}</button>
+          <button className="ad-btn sm" onClick={saveTrack} disabled={saving}>{saving ? "Saving…" : saved ? "Saved ✓" : "Save tracking"}</button>
           {o.status !== "dispatched" && o.status !== "delivered" && <button className="ad-chip" onClick={() => onStatus(o.id, "dispatched")}>Mark as dispatched</button>}
           <a className="ad-chip wapp" target="_blank" rel="noopener noreferrer" href={tellCustomer}>Send tracking on WhatsApp</a>
         </div>
@@ -196,10 +200,27 @@ function Dashboard({ onLoggedOut }) {
     return () => clearInterval(t);
   }, [load]);
 
-  const patch = async (id, body) => {
-    const r = await fetch(`/api/admin/orders/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    if (r.status === 401) return onLoggedOut();
-    if (r.ok) { const d = await r.json(); setOrders((list) => list.map((o) => (o.id === id ? d.order : o))); }
+  // Changes are sent one after another (never in parallel), so two quick clicks can't overwrite each other.
+  const queue = useRef(Promise.resolve());
+  const [toast, setToast] = useState("");
+  const flash = (m) => { setToast(m); setTimeout(() => setToast(""), 6000); };
+  const patch = (id, body) => {
+    const run = async () => {
+      try {
+        const r = await fetch(`/api/admin/orders/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+        if (r.status === 401) { onLoggedOut(); return false; }
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) { flash(d.error || `Could not save (error ${r.status}). Please try again.`); return false; }
+        setOrders((list) => list.map((o) => (o.id === id ? d.order : o)));
+        return true;
+      } catch {
+        flash("Network problem: nothing was saved. Please check your internet and try again.");
+        return false;
+      }
+    };
+    const p = queue.current.then(run, run);
+    queue.current = p.catch(() => {});
+    return p;
   };
   const remove = async (id) => {
     const r = await fetch(`/api/admin/orders/${encodeURIComponent(id)}`, { method: "DELETE" });
@@ -261,6 +282,7 @@ function Dashboard({ onLoggedOut }) {
         <input className="ad-search" placeholder="Search name, phone, city, order ID…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search orders" />
       </section>
 
+      {toast && <div className="ad-err" role="alert" style={{ margin: "0 0 1rem" }}>{toast}</div>}
       {orders === null ? (
         <p className="ad-empty">Loading orders…</p>
       ) : shown.length === 0 ? (
