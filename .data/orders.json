@@ -1,39 +1,28 @@
 [
   {
-    "id": "SW-261113-597B",
-    "createdAt": "2026-11-13T10:27:46.763Z",
-    "status": "dispatched",
-    "name": "zainab",
-    "phone": "03440041574",
-    "email": "",
-    "country": "Pakistan",
-    "city": "sukkur",
-    "address": "vhjvjyyyyyyyyyyyyyy",
-    "qty": 1,
-    "payment": "cod",
-    "product": "Cleanser + Facewash (150 ml)",
-    "unitPrice": 550,
-    "subtotal": 550,
-    "delivery": 350,
-    "total": 900,
-    "meta": {
-      "ip": "::1",
-      "device": "Desktop",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
-      "ipCity": "",
-      "ipCountry": "",
-      "referrer": "http://localhost:3000/"
-    },
-    "updatedAt": "2026-11-13T10:28:26.871Z"
-  },
-  {
     "id": "SW-261117-9579",
     "createdAt": "2026-11-17T09:06:00.096Z",
-    "status": "new",
+    "status": "delivered",
     "history": [
       {
         "status": "new",
         "at": "2026-11-17T09:06:00.096Z"
+      },
+      {
+        "status": "confirmed",
+        "at": "2026-11-22T18:03:03.228Z"
+      },
+      {
+        "status": "awaiting_payment",
+        "at": "2026-11-22T18:03:06.251Z"
+      },
+      {
+        "status": "dispatched",
+        "at": "2026-11-22T18:03:08.939Z"
+      },
+      {
+        "status": "delivered",
+        "at": "2026-11-22T18:04:12.782Z"
       }
     ],
     "name": "zainab alii",
@@ -57,6 +46,10 @@
       "ipCity": "",
       "ipCountry": "",
       "referrer": "http://localhost:3000/"
-    }
+    },
+    "updatedAt": "2026-11-22T18:04:12.782Z",
+    "courier": "PostEx",
+    "trackingId": "74338783932293",
+    "trackingUrl": ""
   }
 ]

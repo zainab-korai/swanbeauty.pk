@@ -223,8 +223,13 @@ function Dashboard({ onLoggedOut }) {
     return p;
   };
   const remove = async (id) => {
-    const r = await fetch(`/api/admin/orders/${encodeURIComponent(id)}`, { method: "DELETE" });
-    if (r.ok) setOrders((list) => list.filter((o) => o.id !== id));
+    try {
+      const r = await fetch(`/api/admin/orders/${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (r.status === 401) return onLoggedOut();
+      if (r.ok) { setOrders((list) => list.filter((o) => o.id !== id)); return; }
+      const d = await r.json().catch(() => ({}));
+      flash(d.error || `Could not delete (error ${r.status}).`);
+    } catch { flash("Network problem: nothing was deleted."); }
   };
   const logout = async () => { await fetch("/api/admin/logout", { method: "POST" }); onLoggedOut(); };
 

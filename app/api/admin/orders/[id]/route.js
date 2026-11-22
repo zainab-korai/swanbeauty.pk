@@ -3,6 +3,12 @@ import { getOrder, saveOrder, deleteOrder } from "../../../../../lib/store";
 import { STATUSES } from "../../../../../lib/config";
 import { cleanText } from "../../../../../lib/orders";
 
+// EROFS = the host (Vercel) does not allow writing files: the Upstash Redis database is not connected yet.
+const dbMessage = (e) =>
+  /EROFS|read-only|ENOENT|EACCES/i.test(String(e && e.message))
+    ? "Database not connected. In Vercel add Upstash Redis (Storage tab), then Redeploy. Until then nothing can be saved or deleted."
+    : "Could not save: " + String(e && e.message ? e.message : e).slice(0, 120);
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -43,7 +49,7 @@ export async function PATCH(req, ctx) {
     return json({ ok: true, order });
   } catch (e) {
     console.error("order update failed", e);
-    return json({ error: "Could not save to the database: " + String(e && e.message ? e.message : e).slice(0, 120) }, 500);
+    return json({ error: dbMessage(e) }, 500);
   }
 }
 
@@ -51,6 +57,11 @@ export async function DELETE(req, ctx) {
   const denied = requireAdmin(req);
   if (denied) return denied;
   const { id } = await ctx.params;
-  await deleteOrder(id);
-  return json({ ok: true });
+  try {
+    await deleteOrder(id);
+    return json({ ok: true });
+  } catch (e) {
+    console.error("order delete failed", e);
+    return json({ error: dbMessage(e) }, 500);
+  }
 }

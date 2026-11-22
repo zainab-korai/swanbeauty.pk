@@ -107,3 +107,21 @@ scripts/        set-password.js, make_images.py
 - Naya Order ID: `S` + 12 digits (e.g. `S482915067341`). Har order ka alag, random.
 - `/track` par ab sirf Order ID chahiye (phone number nahi). Purane `SW-...` IDs bhi chalte hain.
 - ID bhool jaye to Admin panel > search box mein customer ka naam / phone / city likhein, order card par uski ID likhi hoti hai.
+
+## Image / video names used by the live site (user's own names, keep these)
+- Hero: `/images/product-real-2.png`
+- How to use: `/images/product-real-33.png`
+- Real bottle photo: `/images/hero-image.png`
+- Real bottle video: `/videos/ritual.mp4` (focus: `VIDEO_FOCUS` in app/page.js)
+- Labels: `label-front.webp`, `label-back.webp`; logos `logo-*.png`
+- Admin on Vercel needs env vars ADMIN_EMAIL, ADMIN_PASSWORD_HASH, SESSION_SECRET (+ Upstash Redis for orders).
+
+## v13 - naya storefront (Shopify style)
+- `/` home (hero, categories, featured product), `/face-wash` product page + order form, `/shop` coming soon.
+- Shop ki subcategories baad mein: `app/shop/page.js` mein cards add karein.
+- Vercel par orders ke liye Upstash Redis zaroori hai (Storage tab). Warna admin mein "Database not connected" aata hai.
+
+## v14 - landing page, feedback, Instagram
+- Meta ads landing page: `/lp/face-wash` (order form isi page par). Ads ka link: https://swanbeautypk.vercel.app/lp/face-wash
+- Feedback images: `public/images/review1.jpeg`, `review2.jpeg` (.jpg / .png bhi chalta hai). Instagram link: `components/ui.js` mein `INSTAGRAM`.
+- Meta Pixel: Vercel mein `NEXT_PUBLIC_META_PIXEL_ID` (sirf number) set karein, phir Redeploy. Order hone par "Purchase" event khud jata hai.
